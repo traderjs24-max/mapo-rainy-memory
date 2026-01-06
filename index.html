@@ -24,6 +24,7 @@
             position: relative; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.4); color: #fff; text-align: center; z-index: 10;
+            padding-bottom: 50px; /* 모바일에서 하단 여백 확보 */
         }
 
         /* 타이틀 */
@@ -68,6 +69,7 @@
         }
         .menu-btn:hover { background: #fff; color: #000; border-color: #fff; }
 
+        /* [PC용 기본 사운드 컨트롤] */
         .sound-controls {
             position: absolute; bottom: 40px; right: 40px;
             background: rgba(0, 0, 0, 0.6); padding: 20px;
@@ -183,11 +185,39 @@
         }
         .dark-map { width: 100%; height: 100%; border: 0; filter: invert(100%) hue-rotate(180deg) contrast(1.2) grayscale(0.2); }
 
+        /* [📱 모바일 최적화 스타일] */
         @media (max-width: 768px) {
             .music-room { flex-direction: column; overflow-y: auto; }
             .music-list { height: 250px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
-            .title { font-size: 3rem; }
+            
+            /* 타이틀 크기 조정 */
+            .title { font-size: 2.8rem; }
+            
+            /* 모달 패딩 조정 */
             .diary-paper, .guestbook-paper, .novel-paper { padding: 30px; }
+
+            /* 컨테이너 하단 여백 확보 (버튼이 가려지지 않게) */
+            .container { padding-bottom: 150px; }
+
+            /* [모바일 사운드 컨트롤 수정] - 하단 고정형 */
+            .sound-controls {
+                position: fixed;        /* 화면에 고정 */
+                bottom: 0; left: 0; right: 0; /* 맨 아래, 좌우 꽉 차게 */
+                width: 100%;
+                border-radius: 20px 20px 0 0; /* 위쪽 모서리만 둥글게 */
+                background: rgba(0, 0, 0, 0.9); /* 배경 더 진하게 */
+                padding: 25px 30px 40px 30px; /* 터치하기 좋게 여백 넉넉히 */
+                display: none;          /* JS가 제어함 */
+                border: none; border-top: 1px solid rgba(255,255,255,0.2);
+            }
+            
+            /* 슬라이더 옆으로 배치 */
+            .control-group { 
+                display: flex; justify-content: space-between; align-items: center; 
+                margin-bottom: 15px; 
+            }
+            .label { margin-bottom: 0; font-size: 0.9rem; width: 100px; }
+            input[type=range] { width: 100%; flex: 1; margin-left: 15px; height: 5px; }
         }
     </style>
 </head>
@@ -216,8 +246,8 @@
     </div>
 
     <div class="sound-controls" id="mixer">
-        <div class="control-group"><span class="label">Music Volume</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('bg-music', this.value)"></div>
-        <div class="control-group"><span class="label">Rain Volume</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('rain', this.value)"></div>
+        <div class="control-group"><span class="label">Music Vol</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('bg-music', this.value)"></div>
+        <div class="control-group"><span class="label">Rain Vol</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('rain', this.value)"></div>
     </div>
 
     <div class="modal-overlay" id="musicModal">
