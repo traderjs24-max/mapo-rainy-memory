@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapo, Rainy Memory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* [기본 설정] */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: transparent; }
+
+        /* 배경 설정 */
+        .video-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1; opacity: 0.7;
+            background-image: url('https://images.pexels.com/photos/1102909/pexels-photo-1102909.jpeg?auto=compress&cs=tinysrgb&w=1600');
+            background-size: cover; background-position: center;
+        }
+
+        .black-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: -2; }
+
+        .container {
+            position: relative; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.4); color: #fff; text-align: center; z-index: 10;
+        }
+
+        /* 타이틀 */
+        .title {
+            font-size: 4.5rem; font-weight: 700; margin-bottom: 5px;
+            letter-spacing: -2px; text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            min-height: 1.2em; 
+        }
+        .cursor {
+            display: inline-block; width: 3px; height: 1em; background-color: #fff;
+            margin-left: 5px; animation: blink 1s infinite; vertical-align: middle;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .subtitle {
+            font-size: 1.1rem; font-weight: 300; letter-spacing: 2px; opacity: 0.9;
+            margin-bottom: 20px; animation: fadeIn 3s ease-in-out 1s backwards;
+        }
+
+        /* 시계 */
+        #real-time-clock {
+            font-size: 0.9rem; font-weight: 300; letter-spacing: 1px;
+            opacity: 0.7; border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 15px; border-radius: 20px;
+            animation: fadeIn 3s ease-in-out 2s backwards;
+        }
+
+        .start-btn {
+            margin-top: 50px; padding: 15px 45px;
+            border: 1px solid rgba(255,255,255,0.6); background: transparent;
+            color: #fff; font-weight: 500; cursor: pointer; transition: 0.3s;
+            backdrop-filter: blur(5px); animation: fadeIn 3s ease-in-out 2.5s backwards;
+        }
+        .start-btn:hover { background: #fff; color: #000; border-color: #fff; transform: translateY(-3px); }
+
+        /* 버튼 그룹 */
+        .button-group { margin-top: 40px; display: none; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .menu-btn {
+            padding: 12px 25px; border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3); color: #eee; font-weight: 400;
+            cursor: pointer; transition: 0.3s;
+        }
+        .menu-btn:hover { background: #fff; color: #000; border-color: #fff; }
+
+        .sound-controls {
+            position: absolute; bottom: 40px; right: 40px;
+            background: rgba(0, 0, 0, 0.6); padding: 20px;
+            border-radius: 8px; backdrop-filter: blur(10px);
+            display: none; text-align: left; z-index: 20;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .control-group { margin-bottom: 15px; }
+        .label { font-size: 0.8rem; margin-bottom: 8px; display: block; opacity: 0.7; font-weight: 300; }
+        input[type=range] { width: 120px; cursor: pointer; accent-color: #fff; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+        /* 모달 공통 */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 100; backdrop-filter: blur(10px);
+            justify-content: center; align-items: center; animation: fadeIn 0.4s; color: #fff;
+        }
+        .close-btn {
+            position: absolute; top: 30px; right: 40px; font-size: 2.5rem;
+            cursor: pointer; background: none; border: none; color: #fff;
+            transition: 0.3s; z-index: 101; font-weight: 100;
+        }
+        .close-btn:hover { transform: rotate(90deg); color: #ccc; }
+
+        /* 뮤직룸 */
+        .music-room { width: 90%; max-width: 900px; height: 80vh; display: flex; gap: 50px; }
+        .music-list { flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 30px; overflow-y: auto; }
+        .track-item {
+            padding: 20px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer; transition: 0.3s; display: flex; justify-content: space-between; align-items: center;
+            color: rgba(255, 255, 255, 0.6); 
+        }
+        .track-item:hover { background: rgba(255,255,255,0.05); padding-left: 20px; color: #fff; }
+        .track-item.active { color: #fff; font-weight: 700; border-left: 3px solid #fff; padding-left: 20px; background: rgba(255,255,255,0.02); }
+        .track-title { font-size: 1.1rem; margin-bottom: 5px; }
+        .track-artist { font-size: 0.8rem; opacity: 0.5; font-weight: 300; }
+        .music-info { flex: 1.2; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+        .info-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -1px; }
+        .info-artist { font-size: 1rem; opacity: 0.6; margin-bottom: 40px; font-weight: 300; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; display: inline-block;}
+        .info-desc { font-size: 1rem; line-height: 1.8; opacity: 0.8; white-space: pre-line; font-weight: 300; }
+
+        /* [일기장/방명록/소설 공통 스타일] */
+        .diary-paper, .guestbook-paper, .novel-paper {
+            background: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px; width: 90%; max-width: 600px; height: 80vh;
+            overflow-y: auto; color: #eee; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+        .novel-paper { max-width: 800px; }
+
+        .diary-form {
+            margin-bottom: 40px; padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-label { display: block; font-size: 0.8rem; opacity: 0.6; margin-bottom: 5px; }
+        
+        .custom-input, .custom-textarea {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); color: #fff;
+            padding: 10px; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        .custom-input:focus, .custom-textarea:focus { border-color: #fff; background: rgba(255,255,255,0.1); }
+        .custom-textarea { height: 100px; resize: none; }
+        
+        .novel-textarea { height: 300px; line-height: 1.8; font-size: 1.05rem; }
+
+        .write-btn {
+            width: 100%; padding: 12px; background: #fff; color: #000;
+            border: none; font-weight: 700; cursor: pointer; transition: 0.3s;
+        }
+        .write-btn:hover { background: #ddd; }
+        .write-btn.edit-mode { background: #ffd700; } 
+
+        .diary-entry, .guestbook-entry { 
+            background: rgba(255,255,255,0.03); 
+            padding: 25px; margin-bottom: 20px; 
+            text-align: left; position: relative;
+        }
+        .diary-title { 
+            font-weight: 700; font-size: 1.4rem; margin-bottom: 10px; color: #fff;
+            padding-right: 140px; word-break: keep-all; 
+        }
+        .diary-date { font-size: 0.8rem; opacity: 0.5; margin-bottom: 15px; display: block; }
+        .diary-content { font-size: 0.95rem; opacity: 0.8; line-height: 1.8; white-space: pre-line; }
+        
+        .entry-actions {
+            position: absolute; top: 20px; right: 20px;
+            display: flex; gap: 8px;
+        }
+        .action-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.5); font-size: 0.7rem; padding: 5px 10px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .action-btn:hover { border-color: #fff; color: #fff; }
+        .delete-btn:hover { border-color: red; color: red; }
+
+        /* 방명록 스타일 */
+        .guestbook-entry { border-left: 2px solid #aaa; padding: 20px; }
+        .gb-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: flex-end; }
+        .gb-name { font-weight: 700; font-size: 1.1rem; color: #fff; }
+        .gb-date { font-size: 0.75rem; opacity: 0.5; }
+        .gb-message { font-size: 0.95rem; opacity: 0.9; white-space: pre-line; line-height: 1.6; }
+
+        .map-window {
+            width: 80%; height: 80%; max-width: 1000px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .dark-map { width: 100%; height: 100%; border: 0; filter: invert(100%) hue-rotate(180deg) contrast(1.2) grayscale(0.2); }
+
+        @media (max-width: 768px) {
+            .music-room { flex-direction: column; overflow-y: auto; }
+            .music-list { height: 250px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
+            .title { font-size: 3rem; }
+            .diary-paper, .guestbook-paper, .novel-paper { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="black-backdrop"></div>
+    <video class="video-bg" autoplay muted loop playsinline><source src="london_rain.mp4" type="video/mp4"></video>
+    
+    <audio id="bg-music"><source src="chopin_raindrop.mp3" type="audio/mp3"></audio> 
+    <audio id="rain" loop><source src="rain_sound.mp3" type="audio/mp3"></audio>
+
+    <div class="container">
+        <h1 class="title"><span id="typing-text"></span><span class="cursor"></span></h1>
+        <p class="subtitle">하늘공원의 억새, 그리고 쇼팽</p>
+        <div id="real-time-clock">00:00:00</div>
+        
+        <button class="start-btn" onclick="startExperience()">산책 시작하기</button>
+        
+        <div class="button-group">
+            <button class="menu-btn" onclick="openModal('musicModal')">🎧 Music Room</button>
+            <button class="menu-btn" onclick="openModal('diaryModal')">📖 Diary</button>
+            <button class="menu-btn" onclick="openModal('novelModal')">✍️ Novel Studio</button>
+            <button class="menu-btn" onclick="openModal('guestbookModal')">🖊️ Guestbook</button>
+            <button class="menu-btn" onclick="openModal('mapModal')">🗺️ Map</button>
+        </div>
+    </div>
+
+    <div class="sound-controls" id="mixer">
+        <div class="control-group"><span class="label">Music Volume</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('bg-music', this.value)"></div>
+        <div class="control-group"><span class="label">Rain Volume</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('rain', this.value)"></div>
+    </div>
+
+    <div class="modal-overlay" id="musicModal">
+        <button class="close-btn" onclick="closeModal('musicModal')">×</button>
+        <div class="music-room">
+            <div class="music-list" id="playlist-container"></div>
+            <div class="music-info">
+                <h2 class="info-title" id="track-title">Select Music</h2>
+                <p class="info-artist" id="track-artist">Mapo Sentiment Collection</p>
+                <p class="info-desc" id="track-desc">비 오는 하늘공원과 어울리는 곡을 선택해주세요.<br>음악은 풍경을 완성하는 마지막 조각입니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="diaryModal">
+        <div class="diary-paper">
+            <button class="close-btn" onclick="closeModal('diaryModal')">×</button>
+            <div class="diary-form">
+                <div class="input-group"><label class="input-label">Title</label><input type="text" id="input-title" class="custom-input" placeholder="오늘의 제목"></div>
+                <div class="input-group"><label class="input-label">Content</label><textarea id="input-content" class="custom-textarea" placeholder="생각을 기록하세요..."></textarea></div>
+                <button class="write-btn" id="save-btn" onclick="handleSave()">기록하기</button>
+            </div>
+            <div id="diary-container"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="novelModal">
+        <div class="novel-paper">
+            <button class="close-btn" onclick="closeModal('novelModal')">×</button>
+            <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; letter-spacing: -1px; color: #fff;">Novel Studio</h2>
+            <div class="diary-form">
+                <div class="input-group"><label class="input-label">Chapter Title</label><input type="text" id="novel-title" class="custom-input" placeholder="챕터 제목을 입력하세요"></div>
+                <div class="input-group"><label class="input-label">Story Content</label><textarea id="novel-content" class="custom-textarea novel-textarea" placeholder="당신의 이야기를 시작하세요..."></textarea></div>
+                <button class="write-btn" id="novel-save-btn" onclick="handleNovelSave()">저장하기</button>
+            </div>
+            <div id="novel-container"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="guestbookModal">
+        <div class="guestbook-paper">
+            <button class="close-btn" onclick="closeModal('guestbookModal')">×</button>
+            <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 20px; letter-spacing: -1px;">Visitors Book</h2>
+            <div class="diary-form">
+                <div class="input-group"><label class="input-label">Nickname</label><input type="text" id="gb-name" class="custom-input" placeholder="방문자 이름"></div>
+                <div class="input-group"><label class="input-label">Message</label><textarea id="gb-message" class="custom-textarea" style="height: 60px;" placeholder="짧은 감상을 남겨주세요..."></textarea></div>
+                <button class="write-btn" onclick="addGuestbook()">남기기</button>
+            </div>
+            <div id="guestbook-container"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="mapModal">
+        <div class="map-window">
+            <button class="close-btn" onclick="closeModal('mapModal')">×</button>
+            <iframe class="dark-map" src="https://maps.google.com/maps?q=서울+마포구+하늘공원&t=m&z=15&output=embed&iwloc=near" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </div>
+
+    <script>
+        /* === [기능 및 데이터] === */
+        const textToType = "Mapo, Rainy Memory";
+        const typingElement = document.getElementById('typing-text');
+        let typeIndex = 0;
+
+        function typeWriter() {
+            if (typeIndex < textToType.length) {
+                typingElement.innerHTML += textToType.charAt(typeIndex);
+                typeIndex++;
+                setTimeout(typeWriter, 150);
+            }
+        }
+        
+        window.onload = function() {
+            typeWriter();
+            updateClock();
+            setInterval(updateClock, 1000);
+        };
+
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR', { hour12: false });
+            document.getElementById('real-time-clock').innerText = "SEOUL " + timeString;
+        }
+
+        const musicLibrary = [
+            { title: "Raindrop Prelude", artist: "Frédéric Chopin", file: "chopin_raindrop.mp3", desc: "쇼팽이 빗소리를 들으며 작곡한 명곡입니다.<br>하늘공원의 억새 잎 위로 떨어지는 빗방울을 상상하며 들어보세요." },
+            { title: "The Four Seasons: Spring", artist: "Antonio Vivaldi", file: "spring.mp3", desc: "긴 겨울이 가고 생명이 움트는 봄을 노래합니다.<br>차가운 빗줄기 속에서도 곧 따스한 햇살이 비칠 희망을 전해줍니다." },
+            { title: "The Four Seasons: Summer", artist: "Antonio Vivaldi (Op. 8, RV 315)", file: "summer.mp3", desc: "사계 중 가장 격렬하고 뜨거운 곡입니다.<br>한여름 장마철, 세차게 쏟아지는 빗줄기와 천둥소리를 느껴보세요." },
+            { title: "The Four Seasons: Autumn", artist: "Antonio Vivaldi", file: "autumn.mp3", desc: "풍요로운 수확의 계절을 묘사한 곡입니다.<br>하늘공원의 은빛 억새가 바람에 춤추는 풍경이 떠오릅니다." },
+            { title: "Winter: II. Largo", artist: "Antonio Vivaldi (RV 297)", file: "winter_largo.mp3", desc: "따뜻한 난로가에서 밖을 바라보는 듯한 평온함.<br>빗방울 같은 피치카토 반주 위로 흐르는 바이올린의 서정적인 선율입니다." },
+            { title: "Nocturne Op. 9 No. 1", artist: "Frédéric Chopin", file: "nocturne_op9_1.mp3", desc: "밤의 적막과 비 오는 날의 쓸쓸함을 담은 곡입니다.<br>쇼팽 특유의 서정적인 멜로디가 빗소리와 함께 감성을 자극합니다." },
+            { title: "Nocturne in C# minor", artist: "Frédéric Chopin (Posth.)", file: "nocturne_c_sharp.mp3", desc: "영화 '피아니스트'의 주제곡으로 유명한 명곡.<br>애절하고 비극적인 아름다움이 비 오는 풍경을 영화처럼 만들어줍니다." },
+            { title: "Fantaisie-Impromptu Op. 66", artist: "Frédéric Chopin", file: "fantaisie_impromptu.mp3", desc: "쏟아지는 빗줄기처럼 빠른 오른손의 움직임과,<br>꿈꾸는 듯한 중간부의 멜로디가 대조를 이루는 환상적인 곡입니다." }
+        ];
+
+        const bgMusic = document.getElementById('bg-music');
+        const rainSound = document.getElementById('rain');
+        
+        let editingIndex = -1;
+        let novelEditingIndex = -1;
+        let currentTrackIndex = 0; 
+
+        // [중요] 시작 함수 수정됨
+        function startExperience() {
+            // 1. 화면 전환을 최우선으로 실행 (음악 오류가 나도 대문은 열림)
+            document.querySelector('.start-btn').style.display = 'none';
+            document.querySelector('.button-group').style.display = 'flex';
+            document.getElementById('mixer').style.display = 'block';
+
+            // 2. 그 다음 기능 로드
+            bgMusic.volume = 0.5; rainSound.volume = 0.5;
+            
+            renderPlaylist(); 
+            loadDiaries(); 
+            loadGuestbook(); 
+            loadNovels();
+
+            // 3. 마지막으로 음악 재생 시도
+            playTrack(0); 
+            rainSound.play().catch(e => console.log("빗소리 재생 실패"));
+        }
+
+        bgMusic.addEventListener('ended', function() {
+            currentTrackIndex = (currentTrackIndex + 1) % musicLibrary.length;
+            playTrack(currentTrackIndex);
+        });
+
+        function setVolume(id, value) { document.getElementById(id).volume = value; }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        /* [일기장 저장] */
+        const defaultDiaries = [{ title: "상암동의 잿빛 오후", date: "2026.01.06 | Mapo, Seoul", content: `하늘공원 전망대에 올라 빗속에 잠긴 서울을 본다.\n저 멀리 흐르는 한강 위로 옅은 물안개가 피어오르고...` }];
+        function handleSave() {
+            const t = document.getElementById('input-title'); const c = document.getElementById('input-content');
+            if(t.value.trim()==""||c.value.trim()==""){alert("입력해주세요");return;}
+            let d = JSON.parse(localStorage.getItem('myDiaries'))||defaultDiaries;
+            if(editingIndex===-1) d.unshift({title:t.value, content:c.value, date:new Date().toLocaleDateString()});
+            else { d[editingIndex]={title:t.value, content:c.value, date:new Date().toLocaleDateString()}; editingIndex=-1; document.getElementById('save-btn').innerText="기록하기"; document.getElementById('save-btn').classList.remove('edit-mode'); }
+            localStorage.setItem('myDiaries', JSON.stringify(d)); renderDiaries(d); t.value=""; c.value="";
+        }
+        function editDiary(i){let d=JSON.parse(localStorage.getItem('myDiaries'))||defaultDiaries;document.getElementById('input-title').value=d[i].title;document.getElementById('input-content').value=d[i].content;editingIndex=i;let b=document.getElementById('save-btn');b.innerText="수정 완료";b.classList.add('edit-mode');}
+        function deleteDiary(i){if(confirm("삭제하시겠습니까?")){let d=JSON.parse(localStorage.getItem('myDiaries'))||defaultDiaries;d.splice(i,1);localStorage.setItem('myDiaries',JSON.stringify(d));renderDiaries(d);}}
+        function loadDiaries(){let d=JSON.parse(localStorage.getItem('myDiaries'))||defaultDiaries;renderDiaries(d);}
+        function renderDiaries(d){const c=document.getElementById('diary-container');c.innerHTML='';d.forEach((e,i)=>{c.innerHTML+=`<div class="diary-entry"><div class="entry-actions"><button class="action-btn" onclick="editDiary(${i})">수정</button><button class="action-btn delete-btn" onclick="deleteDiary(${i})">삭제</button></div><h2 class="diary-title">${e.title}</h2><span class="diary-date">${e.date}</span><p class="diary-content">${e.content}</p></div>`;});}
+
+        /* [소설 저장] */
+        const defaultNovels = [{ title: "Chapter 1. 빗소리", date: "2026.01.06", content: "그날따라 비는 멈추지 않고 내렸다.\n그는 창가에 서서..." }];
+        function handleNovelSave() {
+            const t = document.getElementById('novel-title'); const c = document.getElementById('novel-content');
+            if(t.value.trim()==""||c.value.trim()==""){alert("입력해주세요");return;}
+            let n = JSON.parse(localStorage.getItem('myNovels'))||defaultNovels;
+            if(novelEditingIndex===-1) n.unshift({title:t.value, content:c.value, date:new Date().toLocaleDateString()});
+            else { n[novelEditingIndex]={title:t.value, content:c.value, date:new Date().toLocaleDateString()}; novelEditingIndex=-1; document.getElementById('novel-save-btn').innerText="저장하기"; document.getElementById('novel-save-btn').classList.remove('edit-mode'); }
+            localStorage.setItem('myNovels', JSON.stringify(n)); renderNovels(n); t.value=""; c.value="";
+        }
+        function editNovel(i){let n=JSON.parse(localStorage.getItem('myNovels'))||defaultNovels;document.getElementById('novel-title').value=n[i].title;document.getElementById('novel-content').value=n[i].content;novelEditingIndex=i;let b=document.getElementById('novel-save-btn');b.innerText="수정 완료";b.classList.add('edit-mode');document.querySelector('.novel-paper').scrollTop=0;}
+        function deleteNovel(i){if(confirm("삭제하시겠습니까?")){let n=JSON.parse(localStorage.getItem('myNovels'))||defaultNovels;n.splice(i,1);localStorage.setItem('myNovels',JSON.stringify(n));renderNovels(n);}}
+        function loadNovels(){let n=JSON.parse(localStorage.getItem('myNovels'))||defaultNovels;renderNovels(n);}
+        function renderNovels(n){const c=document.getElementById('novel-container');c.innerHTML='';n.forEach((e,i)=>{c.innerHTML+=`<div class="diary-entry"><div class="entry-actions"><button class="action-btn" onclick="editNovel(${i})">수정</button><button class="action-btn delete-btn" onclick="deleteNovel(${i})">삭제</button></div><h2 class="diary-title">${e.title}</h2><span class="diary-date">${e.date}</span><p class="diary-content">${e.content}</p></div>`;});}
+
+        /* [방명록] */
+        const defaultGuestbook = [{ name: "지나가던 나그네", date: "2026.01.06", message: "비 오는 날의 감성이 너무 좋네요. 잘 쉬다 갑니다." }];
+        function addGuestbook() {
+            const n = document.getElementById('gb-name').value; const m = document.getElementById('gb-message').value;
+            if(!n||!m)return alert("입력해주세요");
+            let g = JSON.parse(localStorage.getItem('mapoGuestbook'))||defaultGuestbook;
+            g.unshift({name:n, message:m, date:new Date().toLocaleDateString()});
+            localStorage.setItem('mapoGuestbook', JSON.stringify(g)); renderGuestbook(g);
+            document.getElementById('gb-name').value=""; document.getElementById('gb-message').value="";
+        }
+        function loadGuestbook(){let g=JSON.parse(localStorage.getItem('mapoGuestbook'))||defaultGuestbook;renderGuestbook(g);}
+        function renderGuestbook(g){const c=document.getElementById('guestbook-container');c.innerHTML='';g.forEach(e=>{c.innerHTML+=`<div class="guestbook-entry"><div class="gb-header"><span class="gb-name">${e.name}</span><span class="gb-date">${e.date}</span></div><p class="gb-message">${e.message}</p></div>`;});}
+
+        /* [음악] */
+        function renderPlaylist() {
+            const c = document.getElementById('playlist-container'); c.innerHTML='';
+            musicLibrary.forEach((t, i) => {
+                c.innerHTML += `<div class="track-item" onclick="playTrack(${i})"><div class="track-info"><div class="track-title">${t.title}</div><div class="track-artist">${t.artist}</div></div><div style="opacity:0.5;">▶</div></div>`;
+            });
+        }
+        function playTrack(index) {
+            currentTrackIndex = index;
+            const track = musicLibrary[index];
+            bgMusic.src = track.file;
+            bgMusic.play(); // 여기서 파일이 없으면 에러가 나지만, 이미 UI가 바뀐 뒤라 괜찮습니다.
+            document.getElementById('track-title').innerText = track.title;
+            document.getElementById('track-artist').innerText = track.artist;
+            document.getElementById('track-desc').innerHTML = track.desc;
+            const items = document.querySelectorAll('.track-item');
+            items.forEach(item => item.classList.remove('active'));
+            if(items[index]) items[index].classList.add('active');
+        }
+    </script>
+</body>
+</html>
