@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Noto+Sans+KR:wght@200;300;400;500;700&display=swap" rel="stylesheet" />
 
   <style>
-    :root{
+    :root{ --safe-b: env(safe-area-inset-bottom, 0px); --vvb: 0px; 
       --bg0:#07070a;
       --bg1:#0b0b10;
       --text:rgba(255,255,255,.92);
@@ -35,13 +35,6 @@
       --r:18px;
       --r2:28px;
       --ok:#a6ffd8;
-      --safeB: env(safe-area-inset-bottom, 0px);
-      --vvb: 0px;
-      --wrapPadB: 160px;
-      --dockBase: 20px;
-      --nowBase: 88px;
-      --mixerBase: 132px;
-
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;background:transparent;color:var(--text);overflow:hidden}
@@ -108,7 +101,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 22px 18px calc(var(--wrapPadB) + var(--safeB) + var(--vvb));
+      padding: 22px 18px 160px;
       text-align:center;
     }
     .hero{
@@ -184,7 +177,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(var(--nowBase) + var(--safeB) + var(--vvb));
+      bottom: calc(88px + var(--safe-b) + var(--vvb));
       width: min(980px, 96vw);
       display:none;
       align-items:center;
@@ -243,7 +236,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(var(--dockBase) + var(--safeB) + var(--vvb));
+      bottom: calc(20px + var(--safe-b) + var(--vvb));
       width: min(980px, 96vw);
       display:none;
       gap: 10px;
@@ -277,7 +270,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: calc(var(--mixerBase) + var(--safeB) + var(--vvb)); /* above now bar */
+      bottom: calc(132px + var(--safe-b) + var(--vvb)); /* above now bar */
       width: min(980px, 96vw);
       display:none;
       border-radius: var(--r2);
@@ -648,7 +641,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: 8px;
+      bottom: calc(8px + var(--safe-b) + var(--vvb));
       z-index: 999;
       opacity:0;
       pointer-events:none;
@@ -673,19 +666,13 @@
       .entries{ grid-template-columns: 1fr; }
     }
     @media (max-width: 560px){
-
-      :root{ --wrapPadB: 190px; --nowBase: 96px; --mixerBase: 148px; }
+      .wrap{ padding-bottom: 190px; }
       .dock{ gap: 8px; padding: 10px 10px; }
       .dockBtn{ padding: 9px 12px; font-size: .9rem; }
-      .now{ padding: 10px 10px; }
+      .now{ bottom: 96px; padding: 10px 10px; }
       .now .ctrl{ gap: 6px; }
       .icon{ width: 38px; height: 36px; }
-      .mixer{ padding: 14px; }
-    
-    }
-
-    @media (max-width: 560px) and (orientation: portrait){
-      :root{ --dockBase: 72px; --nowBase: 148px; --mixerBase: 206px; }
+      .mixer{ bottom: 148px; padding: 14px; }
     }
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition: none !important; }
@@ -989,30 +976,7 @@
       toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
     }
 
-    
-    // ===== iOS/Safari safe-area & address-bar awareness (keeps dock visible in portrait)
-    (function(){
-      function updateViewportInset(){
-        try{
-          const vv = window.visualViewport;
-          if(!vv){ document.documentElement.style.setProperty("--vvb", "0px"); return; }
-          // layout viewport height (can include browser UI) minus visual viewport height
-          const layoutH = document.documentElement.clientHeight;
-          const vvb = Math.max(0, layoutH - vv.height - (vv.offsetTop || 0));
-          document.documentElement.style.setProperty("--vvb", vvb + "px");
-        }catch(e){
-          document.documentElement.style.setProperty("--vvb", "0px");
-        }
-      }
-      updateViewportInset();
-      window.addEventListener("resize", updateViewportInset);
-      if(window.visualViewport){
-        window.visualViewport.addEventListener("resize", updateViewportInset);
-        window.visualViewport.addEventListener("scroll", updateViewportInset);
-      }
-    })();
-
-// ===== Background video sanity check
+    // ===== Background video sanity check
     const bgVideo = document.getElementById("bgVideo");
     const markVideoReady = () => {
       document.body.classList.add("video-ready");
@@ -1164,35 +1128,45 @@
     // ===== Load playlist from music.json (recommended for future updates)
     // Put music.json next to index.html. Each item: { file, title, artist, desc }.
     async function loadPlaylistFromJson(){
-      try{
-        const res = await fetch("music.json?v=" + Date.now(), { cache: "no-store" });
-        if(!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        if(!Array.isArray(data) || data.length === 0) throw new Error("Empty playlist");
-        const normalized = data
-          .filter(x => x && typeof x.file === "string" && x.file.trim())
-          .map(x => ({
-            file: (()=>{
-                    let f = String(x.file).trim();
-                    // If you write only "song.mp3" in music.json, we assume it lives in /music/
-                    if(!/^https?:\/\//i.test(f) && !f.includes("/") ) f = "music/" + f;
-                    return f;
-                  })(),
-            title: (x.title ? String(x.title) : String(x.file).replace(/\.[^/.]+$/, "")).trim(),
-            artist: (x.artist ? String(x.artist) : "").trim(),
-            desc: (x.desc ? String(x.desc) : "").trim(),
-          }));
-        if(normalized.length === 0) throw new Error("No valid items");
-        defaultList = normalized;
-        list = [...defaultList];
-        toast(`music.json 로딩됨: ${normalized.length}곡`);
-        return true;
-      }catch(err){
-        // If music.json is missing, we simply fall back to built-in list.
-        // (This keeps local usage smooth.)
-        console.warn("music.json load failed:", err);
-        return false;
+      // Supports either:
+      //  - /music/music.json (music.json placed inside the music folder)
+      //  - /music.json       (music.json placed next to index.html)
+      const candidates = ["music/music.json", "music.json"];
+      for(const url of candidates){
+        try{
+          const res = await fetch(url + "?v=" + Date.now(), { cache: "no-store" });
+          if(!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          if(!Array.isArray(data) || data.length === 0) throw new Error("Empty playlist");
+
+          const normalized = data
+            .filter(x => x && typeof x.file === "string" && x.file.trim())
+            .map(x => {
+              const raw = String(x.file).trim();
+              const hasPath = raw.includes("/") || raw.startsWith("http") || raw.startsWith("blob:");
+              // Your mp3 files live in /music/. If JSON provides only a filename, prefix it.
+              const primary = hasPath ? raw : ("music/" + raw);
+              const alt = hasPath ? "" : raw; // fallback if files are actually in root
+              return {
+                file: primary,
+                fileAlt: alt,
+                title: (x.title ? String(x.title) : raw.split("/").pop().replace(/\.[^/.]+$/, "")).trim(),
+                artist: (x.artist ? String(x.artist) : "").trim(),
+                desc: (x.desc ? String(x.desc) : "").trim(),
+              };
+            });
+
+          if(normalized.length === 0) throw new Error("No valid tracks");
+          list = normalized;
+          if(state.idx >= list.length) state.idx = 0;
+          toast(`playlist loaded • ${normalized.length}곡`);
+          return true;
+        }catch(err){
+          console.warn("playlist load failed:", url, err);
+        }
       }
+      toast("music.json을 읽지 못해 기본 목록을 사용합니다.");
+      return false;
     }
 
     let defaultList = [...FALLBACK_LIST];
@@ -1284,7 +1258,16 @@
     }
 
     function loadSrc(t){
-      musicEl.src = t?.objectUrl || t?.file || "";
+      if(!t){ musicEl.removeAttribute("src"); return; }
+      if(t.objectUrl){
+        musicEl.src = t.objectUrl;
+        musicEl.dataset.alt = "";
+        musicEl.dataset.triedAlt = "0";
+        return;
+      }
+      musicEl.src = t.file || "";
+      musicEl.dataset.alt = t.fileAlt || "";
+      musicEl.dataset.triedAlt = "0";
     }
 
     function safePlay(el){
@@ -1730,7 +1713,25 @@
       setInterval(updateClock, 1000);
 
       // Boot
-      async function init(){
+      
+    // iOS Safari fixed-bar safe-area helper (prevents bottom bars from being hidden)
+    function updateViewportBottomPad(){
+      try{
+        const vv = window.visualViewport;
+        if(!vv){ document.documentElement.style.setProperty('--vvb','0px'); return; }
+        const delta = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+        document.documentElement.style.setProperty('--vvb', delta + 'px');
+      }catch(e){}
+    }
+    window.addEventListener('resize', updateViewportBottomPad, { passive:true });
+    window.addEventListener('orientationchange', updateViewportBottomPad, { passive:true });
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', updateViewportBottomPad, { passive:true });
+      window.visualViewport.addEventListener('scroll', updateViewportBottomPad, { passive:true });
+    }
+
+async function init(){
+      updateViewportBottomPad();
         loadState();
         // Load remote playlist first (if provided), then render.
         await loadPlaylistFromJson();
