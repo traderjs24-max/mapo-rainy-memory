@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapo, Rainy Memory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Union Oracle</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700&display=swap" rel="stylesheet">
     <style>
         /* [기본 설정] */
@@ -24,7 +24,7 @@
             position: relative; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.4); color: #fff; text-align: center; z-index: 10;
-            padding-bottom: 50px; /* 모바일에서 하단 여백 확보 */
+            padding-bottom: 80px; /* 모바일 하단 여백 확보 */
         }
 
         /* 타이틀 */
@@ -69,24 +69,36 @@
         }
         .menu-btn:hover { background: #fff; color: #000; border-color: #fff; }
 
-        /* [PC용 기본 사운드 컨트롤] */
+        /* [PC/모바일 공통 사운드 컨트롤 스타일] */
         .sound-controls {
             position: absolute; bottom: 40px; right: 40px;
-            background: rgba(0, 0, 0, 0.6); padding: 20px;
-            border-radius: 8px; backdrop-filter: blur(10px);
-            display: none; text-align: left; z-index: 20;
+            background: rgba(0, 0, 0, 0.7); padding: 20px;
+            border-radius: 12px; backdrop-filter: blur(10px);
+            display: none; text-align: left; z-index: 999;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .control-group { margin-bottom: 15px; }
-        .label { font-size: 0.8rem; margin-bottom: 8px; display: block; opacity: 0.7; font-weight: 300; }
-        input[type=range] { width: 120px; cursor: pointer; accent-color: #fff; }
+        .control-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .control-group:last-child { margin-bottom: 0; }
+        .label { font-size: 0.9rem; margin-right: 10px; display: block; opacity: 0.9; font-weight: 400; width: 80px; }
+        
+        /* 슬라이더 스타일 커스텀 */
+        input[type=range] {
+            -webkit-appearance: none; width: 140px; height: 6px; 
+            background: rgba(255,255,255,0.2); border-radius: 5px; outline: none; cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px; border-radius: 50%; 
+            background: #fff; cursor: pointer; transition: 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
         /* 모달 공통 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 100; backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.9); z-index: 1000; backdrop-filter: blur(10px);
             justify-content: center; align-items: center; animation: fadeIn 0.4s; color: #fff;
         }
         .close-btn {
@@ -185,39 +197,29 @@
         }
         .dark-map { width: 100%; height: 100%; border: 0; filter: invert(100%) hue-rotate(180deg) contrast(1.2) grayscale(0.2); }
 
-        /* [📱 모바일 최적화 스타일] */
+        /* [📱 모바일 최적화: 볼륨바 하단 고정 & 터치 크기 확대] */
         @media (max-width: 768px) {
             .music-room { flex-direction: column; overflow-y: auto; }
             .music-list { height: 250px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
             
-            /* 타이틀 크기 조정 */
             .title { font-size: 2.8rem; }
-            
-            /* 모달 패딩 조정 */
-            .diary-paper, .guestbook-paper, .novel-paper { padding: 30px; }
+            .diary-paper, .guestbook-paper, .novel-paper { padding: 30px; width: 95%; height: 75vh; }
+            .container { padding-bottom: 140px; } /* 하단 볼륨바 공간 확보 */
 
-            /* 컨테이너 하단 여백 확보 (버튼이 가려지지 않게) */
-            .container { padding-bottom: 150px; }
-
-            /* [모바일 사운드 컨트롤 수정] - 하단 고정형 */
+            /* 볼륨 컨트롤 모바일 스타일 */
             .sound-controls {
-                position: fixed;        /* 화면에 고정 */
-                bottom: 0; left: 0; right: 0; /* 맨 아래, 좌우 꽉 차게 */
+                position: fixed;        
+                bottom: 0; left: 0; right: 0; 
                 width: 100%;
-                border-radius: 20px 20px 0 0; /* 위쪽 모서리만 둥글게 */
-                background: rgba(0, 0, 0, 0.9); /* 배경 더 진하게 */
-                padding: 25px 30px 40px 30px; /* 터치하기 좋게 여백 넉넉히 */
-                display: none;          /* JS가 제어함 */
-                border: none; border-top: 1px solid rgba(255,255,255,0.2);
+                border-radius: 20px 20px 0 0;
+                background: rgba(17, 17, 17, 0.95);
+                padding: 25px 30px 40px 30px;
+                border: none; border-top: 1px solid rgba(255,255,255,0.15);
+                display: none; /* JS로 제어 */
             }
-            
-            /* 슬라이더 옆으로 배치 */
-            .control-group { 
-                display: flex; justify-content: space-between; align-items: center; 
-                margin-bottom: 15px; 
-            }
-            .label { margin-bottom: 0; font-size: 0.9rem; width: 100px; }
-            input[type=range] { width: 100%; flex: 1; margin-left: 15px; height: 5px; }
+            .control-group { margin-bottom: 20px; }
+            input[type=range] { width: 100%; flex: 1; height: 8px; margin-left: 15px; }
+            input[type=range]::-webkit-slider-thumb { width: 24px; height: 24px; } /* 터치하기 좋게 손잡이 키움 */
         }
     </style>
 </head>
@@ -246,8 +248,14 @@
     </div>
 
     <div class="sound-controls" id="mixer">
-        <div class="control-group"><span class="label">Music Vol</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('bg-music', this.value)"></div>
-        <div class="control-group"><span class="label">Rain Vol</span><input type="range" min="0" max="1" step="0.01" value="0.5" oninput="setVolume('rain', this.value)"></div>
+        <div class="control-group">
+            <span class="label">Music</span>
+            <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="setVolume('bg-music', this.value)">
+        </div>
+        <div class="control-group">
+            <span class="label">Rain</span>
+            <input type="range" min="0" max="1" step="0.05" value="0.5" oninput="setVolume('rain', this.value)">
+        </div>
     </div>
 
     <div class="modal-overlay" id="musicModal">
@@ -256,8 +264,8 @@
             <div class="music-list" id="playlist-container"></div>
             <div class="music-info">
                 <h2 class="info-title" id="track-title">Select Music</h2>
-                <p class="info-artist" id="track-artist">Mapo Sentiment Collection</p>
-                <p class="info-desc" id="track-desc">비 오는 하늘공원과 어울리는 곡을 선택해주세요.<br>음악은 풍경을 완성하는 마지막 조각입니다.</p>
+                <p class="info-artist" id="track-artist">Union Oracle Playlist</p>
+                <p class="info-desc" id="track-desc">이성과 감성이 공존하는 당신을 위한 선곡.<br>빗소리와 함께 깊은 사색에 잠겨보세요.</p>
             </div>
         </div>
     </div>
@@ -309,7 +317,7 @@
 
     <script>
         /* === [기능 및 데이터] === */
-        const textToType = "Mapo, Rainy Memory";
+        const textToType = "Union Oracle";
         const typingElement = document.getElementById('typing-text');
         let typeIndex = 0;
 
@@ -333,15 +341,24 @@
             document.getElementById('real-time-clock').innerText = "SEOUL " + timeString;
         }
 
+        /* === [최종 통합 플레이리스트 (총 13곡)] === */
         const musicLibrary = [
-            { title: "Raindrop Prelude", artist: "Frédéric Chopin", file: "chopin_raindrop.mp3", desc: "쇼팽이 빗소리를 들으며 작곡한 명곡입니다.<br>하늘공원의 억새 잎 위로 떨어지는 빗방울을 상상하며 들어보세요." },
-            { title: "The Four Seasons: Spring", artist: "Antonio Vivaldi", file: "Spring.mp3", desc: "긴 겨울이 가고 생명이 움트는 봄을 노래합니다.<br>차가운 빗줄기 속에서도 곧 따스한 햇살이 비칠 희망을 전해줍니다." },
-            { title: "The Four Seasons: Summer", artist: "Antonio Vivaldi (Op. 8, RV 315)", file: "Summer.mp3", desc: "사계 중 가장 격렬하고 뜨거운 곡입니다.<br>한여름 장마철, 세차게 쏟아지는 빗줄기와 천둥소리를 느껴보세요." },
-            { title: "The Four Seasons: Autumn", artist: "Antonio Vivaldi", file: "Autumn.mp3", desc: "풍요로운 수확의 계절을 묘사한 곡입니다.<br>하늘공원의 은빛 억새가 바람에 춤추는 풍경이 떠오릅니다." },
-            { title: "Winter: II. Largo", artist: "Antonio Vivaldi (RV 297)", file: "winter_largo.mp3", desc: "따뜻한 난로가에서 밖을 바라보는 듯한 평온함.<br>빗방울 같은 피치카토 반주 위로 흐르는 바이올린의 서정적인 선율입니다." },
-            { title: "Nocturne Op. 9 No. 1", artist: "Frédéric Chopin", file: "nocturne_op9_1.mp3", desc: "밤의 적막과 비 오는 날의 쓸쓸함을 담은 곡입니다.<br>쇼팽 특유의 서정적인 멜로디가 빗소리와 함께 감성을 자극합니다." },
-            { title: "Nocturne in C# minor", artist: "Frédéric Chopin (Posth.)", file: "nocturne_c_sharp.mp3", desc: "영화 '피아니스트'의 주제곡으로 유명한 명곡.<br>애절하고 비극적인 아름다움이 비 오는 풍경을 영화처럼 만들어줍니다." },
-            { title: "Fantaisie-Impromptu Op. 66", artist: "Frédéric Chopin", file: "fantaisie_impromptu.mp3", desc: "쏟아지는 빗줄기처럼 빠른 오른손의 움직임과,<br>꿈꾸는 듯한 중간부의 멜로디가 대조를 이루는 환상적인 곡입니다." }
+            // [기존 곡들]
+            { title: "Raindrop Prelude", artist: "Frédéric Chopin", file: "chopin_raindrop.mp3", desc: "쇼팽이 빗소리를 들으며 작곡한 명곡." },
+            { title: "The Four Seasons: Spring", artist: "Antonio Vivaldi", file: "spring.mp3", desc: "생명이 움트는 봄의 희망." },
+            { title: "The Four Seasons: Summer", artist: "Antonio Vivaldi", file: "summer.mp3", desc: "한여름의 폭풍우." },
+            { title: "The Four Seasons: Autumn", artist: "Antonio Vivaldi", file: "autumn.mp3", desc: "풍요로운 수확의 계절." },
+            { title: "Winter: II. Largo", artist: "Antonio Vivaldi", file: "winter_largo.mp3", desc: "따뜻한 난로가에서의 평온함." },
+            { title: "Nocturne Op. 9 No. 1", artist: "Frédéric Chopin", file: "nocturne_op9_1.mp3", desc: "밤의 적막과 쓸쓸함." },
+            { title: "Nocturne in C# minor", artist: "Frédéric Chopin", file: "nocturne_c_sharp.mp3", desc: "애절하고 비극적인 아름다움." },
+            { title: "Fantaisie-Impromptu", artist: "Frédéric Chopin", file: "fantaisie_impromptu.mp3", desc: "꿈꾸는 듯한 환상곡." },
+            
+            // [새로 추가된 5곡]
+            { title: "Air on the G String (BWV 1068)", artist: "J.S. Bach", file: "bach_air.mp3", desc: "G선 위에서 펼쳐지는 바흐의 숭고한 아리아." },
+            { title: "Canon in D (P. 37)", artist: "Johann Pachelbel", file: "pachelbel_canon.mp3", desc: "평온하게 반복되는 영원한 멜로디." },
+            { title: "Nocturne Op. 9 No. 2", artist: "Frédéric Chopin", file: "chopin_nocturne_2.mp3", desc: "가장 사랑받는 쇼팽의 감성 야상곡." },
+            { title: "Träumerei (Dreaming)", artist: "Robert Schumann", file: "schumann_dreaming.mp3", desc: "어린 시절의 꿈을 회상하는 따뜻함." },
+            { title: "Gymnopédie No. 1", artist: "Frédéric Chopin", file: "chopin_nocturne_1.mp3", desc: "몽환적이고 신비로운 사색의 시간." }
         ];
 
         const bgMusic = document.getElementById('bg-music');
@@ -351,14 +368,12 @@
         let novelEditingIndex = -1;
         let currentTrackIndex = 0; 
 
-        // [중요] 시작 함수 수정됨
+        // [중요] 시작 함수
         function startExperience() {
-            // 1. 화면 전환을 최우선으로 실행 (음악 오류가 나도 대문은 열림)
             document.querySelector('.start-btn').style.display = 'none';
             document.querySelector('.button-group').style.display = 'flex';
             document.getElementById('mixer').style.display = 'block';
 
-            // 2. 그 다음 기능 로드
             bgMusic.volume = 0.5; rainSound.volume = 0.5;
             
             renderPlaylist(); 
@@ -366,7 +381,6 @@
             loadGuestbook(); 
             loadNovels();
 
-            // 3. 마지막으로 음악 재생 시도
             playTrack(0); 
             rainSound.play().catch(e => console.log("빗소리 재생 실패"));
         }
@@ -376,7 +390,11 @@
             playTrack(currentTrackIndex);
         });
 
-        function setVolume(id, value) { document.getElementById(id).volume = value; }
+        function setVolume(id, value) { 
+            const audio = document.getElementById(id);
+            if(audio) audio.volume = value; 
+        }
+
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -434,10 +452,12 @@
             currentTrackIndex = index;
             const track = musicLibrary[index];
             bgMusic.src = track.file;
-            bgMusic.play(); // 여기서 파일이 없으면 에러가 나지만, 이미 UI가 바뀐 뒤라 괜찮습니다.
+            bgMusic.play().catch(e => console.log('재생 준비 중')); 
+            
             document.getElementById('track-title').innerText = track.title;
             document.getElementById('track-artist').innerText = track.artist;
             document.getElementById('track-desc').innerHTML = track.desc;
+            
             const items = document.querySelectorAll('.track-item');
             items.forEach(item => item.classList.remove('active'));
             if(items[index]) items[index].classList.add('active');
