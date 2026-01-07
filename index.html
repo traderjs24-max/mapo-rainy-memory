@@ -24,7 +24,7 @@
             position: relative; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: rgba(0,0,0,0.4); color: #fff; text-align: center; z-index: 10;
-            padding-bottom: 80px; /* 모바일 하단 여백 확보 */
+            padding-bottom: 80px;
         }
 
         /* 타이틀 */
@@ -69,7 +69,7 @@
         }
         .menu-btn:hover { background: #fff; color: #000; border-color: #fff; }
 
-        /* [PC/모바일 공통 사운드 컨트롤 스타일] */
+        /* 사운드 컨트롤 */
         .sound-controls {
             position: absolute; bottom: 40px; right: 40px;
             background: rgba(0, 0, 0, 0.7); padding: 20px;
@@ -80,8 +80,6 @@
         .control-group { margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
         .control-group:last-child { margin-bottom: 0; }
         .label { font-size: 0.9rem; margin-right: 10px; display: block; opacity: 0.9; font-weight: 400; width: 80px; }
-        
-        /* 슬라이더 스타일 커스텀 */
         input[type=range] {
             -webkit-appearance: none; width: 140px; height: 6px; 
             background: rgba(255,255,255,0.2); border-radius: 5px; outline: none; cursor: pointer;
@@ -91,7 +89,6 @@
             width: 18px; height: 18px; border-radius: 50%; 
             background: #fff; cursor: pointer; transition: 0.2s;
         }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
@@ -125,7 +122,7 @@
         .info-artist { font-size: 1rem; opacity: 0.6; margin-bottom: 40px; font-weight: 300; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 20px; display: inline-block;}
         .info-desc { font-size: 1rem; line-height: 1.8; opacity: 0.8; white-space: pre-line; font-weight: 300; }
 
-        /* [일기장/방명록/소설 공통 스타일] */
+        /* 다이어리/방명록 */
         .diary-paper, .guestbook-paper, .novel-paper {
             background: #1a1a1a; border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 50px; width: 90%; max-width: 600px; height: 80vh;
@@ -134,62 +131,39 @@
             display: flex; flex-direction: column;
         }
         .novel-paper { max-width: 800px; }
-
-        .diary-form {
-            margin-bottom: 40px; padding-bottom: 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
+        .diary-form { margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.2); }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-label { display: block; font-size: 0.8rem; opacity: 0.6; margin-bottom: 5px; }
-        
         .custom-input, .custom-textarea {
             width: 100%; background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1); color: #fff;
             padding: 10px; font-size: 1rem; outline: none; transition: 0.3s;
         }
-        .custom-input:focus, .custom-textarea:focus { border-color: #fff; background: rgba(255,255,255,0.1); }
         .custom-textarea { height: 100px; resize: none; }
-        
         .novel-textarea { height: 300px; line-height: 1.8; font-size: 1.05rem; }
-
         .write-btn {
             width: 100%; padding: 12px; background: #fff; color: #000;
             border: none; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
         .write-btn:hover { background: #ddd; }
         .write-btn.edit-mode { background: #ffd700; } 
-
         .diary-entry, .guestbook-entry { 
-            background: rgba(255,255,255,0.03); 
-            padding: 25px; margin-bottom: 20px; 
-            text-align: left; position: relative;
+            background: rgba(255,255,255,0.03); padding: 25px; margin-bottom: 20px; text-align: left; position: relative;
         }
-        .diary-title { 
-            font-weight: 700; font-size: 1.4rem; margin-bottom: 10px; color: #fff;
-            padding-right: 140px; word-break: keep-all; 
-        }
+        .diary-title { font-weight: 700; font-size: 1.4rem; margin-bottom: 10px; color: #fff; padding-right: 140px; word-break: keep-all; }
         .diary-date { font-size: 0.8rem; opacity: 0.5; margin-bottom: 15px; display: block; }
         .diary-content { font-size: 0.95rem; opacity: 0.8; line-height: 1.8; white-space: pre-line; }
-        
-        .entry-actions {
-            position: absolute; top: 20px; right: 20px;
-            display: flex; gap: 8px;
-        }
+        .entry-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
         .action-btn {
             background: transparent; border: 1px solid rgba(255,255,255,0.2);
             color: rgba(255,255,255,0.5); font-size: 0.7rem; padding: 5px 10px;
             cursor: pointer; transition: 0.3s;
         }
-        .action-btn:hover { border-color: #fff; color: #fff; }
-        .delete-btn:hover { border-color: red; color: red; }
-
-        /* 방명록 스타일 */
         .guestbook-entry { border-left: 2px solid #aaa; padding: 20px; }
         .gb-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: flex-end; }
         .gb-name { font-weight: 700; font-size: 1.1rem; color: #fff; }
         .gb-date { font-size: 0.75rem; opacity: 0.5; }
         .gb-message { font-size: 0.95rem; opacity: 0.9; white-space: pre-line; line-height: 1.6; }
-
         .map-window {
             width: 80%; height: 80%; max-width: 1000px;
             border: 1px solid rgba(255,255,255,0.2);
@@ -197,29 +171,21 @@
         }
         .dark-map { width: 100%; height: 100%; border: 0; filter: invert(100%) hue-rotate(180deg) contrast(1.2) grayscale(0.2); }
 
-        /* [📱 모바일 최적화: 볼륨바 하단 고정 & 터치 크기 확대] */
+        /* 모바일 최적화 */
         @media (max-width: 768px) {
             .music-room { flex-direction: column; overflow-y: auto; }
             .music-list { height: 250px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px; }
-            
             .title { font-size: 2.8rem; }
             .diary-paper, .guestbook-paper, .novel-paper { padding: 30px; width: 95%; height: 75vh; }
-            .container { padding-bottom: 140px; } /* 하단 볼륨바 공간 확보 */
-
-            /* 볼륨 컨트롤 모바일 스타일 */
+            .container { padding-bottom: 140px; }
             .sound-controls {
-                position: fixed;        
-                bottom: 0; left: 0; right: 0; 
-                width: 100%;
-                border-radius: 20px 20px 0 0;
-                background: rgba(17, 17, 17, 0.95);
-                padding: 25px 30px 40px 30px;
-                border: none; border-top: 1px solid rgba(255,255,255,0.15);
-                display: none; /* JS로 제어 */
+                position: fixed; bottom: 0; left: 0; right: 0; width: 100%;
+                border-radius: 20px 20px 0 0; background: rgba(17, 17, 17, 0.95);
+                padding: 25px 30px 40px 30px; border: none; border-top: 1px solid rgba(255,255,255,0.15); display: none;
             }
             .control-group { margin-bottom: 20px; }
             input[type=range] { width: 100%; flex: 1; height: 8px; margin-left: 15px; }
-            input[type=range]::-webkit-slider-thumb { width: 24px; height: 24px; } /* 터치하기 좋게 손잡이 키움 */
+            input[type=range]::-webkit-slider-thumb { width: 24px; height: 24px; }
         }
     </style>
 </head>
@@ -316,7 +282,6 @@
     </div>
 
     <script>
-        /* === [기능 및 데이터] === */
         const textToType = "Union Oracle";
         const typingElement = document.getElementById('typing-text');
         let typeIndex = 0;
@@ -341,9 +306,9 @@
             document.getElementById('real-time-clock').innerText = "SEOUL " + timeString;
         }
 
-        /* === [최종 통합 플레이리스트 (총 13곡)] === */
+        /* [총 13곡 플레이리스트] */
         const musicLibrary = [
-            // [기존 곡들]
+            // 기존 8곡
             { title: "Raindrop Prelude", artist: "Frédéric Chopin", file: "chopin_raindrop.mp3", desc: "쇼팽이 빗소리를 들으며 작곡한 명곡." },
             { title: "The Four Seasons: Spring", artist: "Antonio Vivaldi", file: "spring.mp3", desc: "생명이 움트는 봄의 희망." },
             { title: "The Four Seasons: Summer", artist: "Antonio Vivaldi", file: "summer.mp3", desc: "한여름의 폭풍우." },
@@ -353,7 +318,7 @@
             { title: "Nocturne in C# minor", artist: "Frédéric Chopin", file: "nocturne_c_sharp.mp3", desc: "애절하고 비극적인 아름다움." },
             { title: "Fantaisie-Impromptu", artist: "Frédéric Chopin", file: "fantaisie_impromptu.mp3", desc: "꿈꾸는 듯한 환상곡." },
             
-            // [새로 추가된 5곡]
+            // 신규 5곡 (사티 포함)
             { title: "Air on the G String (BWV 1068)", artist: "J.S. Bach", file: "bach_air.mp3", desc: "G선 위에서 펼쳐지는 바흐의 숭고한 아리아." },
             { title: "Canon in D (P. 37)", artist: "Johann Pachelbel", file: "pachelbel_canon.mp3", desc: "평온하게 반복되는 영원한 멜로디." },
             { title: "Nocturne Op. 9 No. 2", artist: "Frédéric Chopin", file: "chopin_nocturne_2.mp3", desc: "가장 사랑받는 쇼팽의 감성 야상곡." },
@@ -368,7 +333,6 @@
         let novelEditingIndex = -1;
         let currentTrackIndex = 0; 
 
-        // [중요] 시작 함수
         function startExperience() {
             document.querySelector('.start-btn').style.display = 'none';
             document.querySelector('.button-group').style.display = 'flex';
@@ -398,7 +362,7 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        /* [일기장 저장] */
+        /* [일기장/소설/방명록 로직 생략(위와 동일)] */
         const defaultDiaries = [{ title: "상암동의 잿빛 오후", date: "2026.01.06 | Mapo, Seoul", content: `하늘공원 전망대에 올라 빗속에 잠긴 서울을 본다.\n저 멀리 흐르는 한강 위로 옅은 물안개가 피어오르고...` }];
         function handleSave() {
             const t = document.getElementById('input-title'); const c = document.getElementById('input-content');
@@ -413,7 +377,6 @@
         function loadDiaries(){let d=JSON.parse(localStorage.getItem('myDiaries'))||defaultDiaries;renderDiaries(d);}
         function renderDiaries(d){const c=document.getElementById('diary-container');c.innerHTML='';d.forEach((e,i)=>{c.innerHTML+=`<div class="diary-entry"><div class="entry-actions"><button class="action-btn" onclick="editDiary(${i})">수정</button><button class="action-btn delete-btn" onclick="deleteDiary(${i})">삭제</button></div><h2 class="diary-title">${e.title}</h2><span class="diary-date">${e.date}</span><p class="diary-content">${e.content}</p></div>`;});}
 
-        /* [소설 저장] */
         const defaultNovels = [{ title: "Chapter 1. 빗소리", date: "2026.01.06", content: "그날따라 비는 멈추지 않고 내렸다.\n그는 창가에 서서..." }];
         function handleNovelSave() {
             const t = document.getElementById('novel-title'); const c = document.getElementById('novel-content');
@@ -428,7 +391,6 @@
         function loadNovels(){let n=JSON.parse(localStorage.getItem('myNovels'))||defaultNovels;renderNovels(n);}
         function renderNovels(n){const c=document.getElementById('novel-container');c.innerHTML='';n.forEach((e,i)=>{c.innerHTML+=`<div class="diary-entry"><div class="entry-actions"><button class="action-btn" onclick="editNovel(${i})">수정</button><button class="action-btn delete-btn" onclick="deleteNovel(${i})">삭제</button></div><h2 class="diary-title">${e.title}</h2><span class="diary-date">${e.date}</span><p class="diary-content">${e.content}</p></div>`;});}
 
-        /* [방명록] */
         const defaultGuestbook = [{ name: "지나가던 나그네", date: "2026.01.06", message: "비 오는 날의 감성이 너무 좋네요. 잘 쉬다 갑니다." }];
         function addGuestbook() {
             const n = document.getElementById('gb-name').value; const m = document.getElementById('gb-message').value;
@@ -441,7 +403,6 @@
         function loadGuestbook(){let g=JSON.parse(localStorage.getItem('mapoGuestbook'))||defaultGuestbook;renderGuestbook(g);}
         function renderGuestbook(g){const c=document.getElementById('guestbook-container');c.innerHTML='';g.forEach(e=>{c.innerHTML+=`<div class="guestbook-entry"><div class="gb-header"><span class="gb-name">${e.name}</span><span class="gb-date">${e.date}</span></div><p class="gb-message">${e.message}</p></div>`;});}
 
-        /* [음악] */
         function renderPlaylist() {
             const c = document.getElementById('playlist-container'); c.innerHTML='';
             musicLibrary.forEach((t, i) => {
