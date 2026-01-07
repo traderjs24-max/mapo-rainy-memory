@@ -413,7 +413,8 @@
             currentTrackIndex = index;
             const track = musicLibrary[index];
             bgMusic.src = track.file;
-            bgMusic.play().catch(e => console.log('재생 준비 중')); 
+            bgMusic.play(); 
+            // .catch(e => console.log('재생 준비 중')); 
             
             document.getElementById('track-title').innerText = track.title;
             document.getElementById('track-artist').innerText = track.artist;
