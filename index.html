@@ -35,6 +35,13 @@
       --r:18px;
       --r2:28px;
       --ok:#a6ffd8;
+      --safeB: env(safe-area-inset-bottom, 0px);
+      --vvb: 0px;
+      --wrapPadB: 160px;
+      --dockBase: 20px;
+      --nowBase: 88px;
+      --mixerBase: 132px;
+
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;background:transparent;color:var(--text);overflow:hidden}
@@ -101,7 +108,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: 22px 18px 160px;
+      padding: 22px 18px calc(var(--wrapPadB) + var(--safeB) + var(--vvb));
       text-align:center;
     }
     .hero{
@@ -177,7 +184,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: 88px;
+      bottom: calc(var(--nowBase) + var(--safeB) + var(--vvb));
       width: min(980px, 96vw);
       display:none;
       align-items:center;
@@ -236,7 +243,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: 20px;
+      bottom: calc(var(--dockBase) + var(--safeB) + var(--vvb));
       width: min(980px, 96vw);
       display:none;
       gap: 10px;
@@ -270,7 +277,7 @@
       position:fixed;
       left:50%;
       transform:translateX(-50%);
-      bottom: 132px; /* above now bar */
+      bottom: calc(var(--mixerBase) + var(--safeB) + var(--vvb)); /* above now bar */
       width: min(980px, 96vw);
       display:none;
       border-radius: var(--r2);
@@ -666,13 +673,19 @@
       .entries{ grid-template-columns: 1fr; }
     }
     @media (max-width: 560px){
-      .wrap{ padding-bottom: 190px; }
+
+      :root{ --wrapPadB: 190px; --nowBase: 96px; --mixerBase: 148px; }
       .dock{ gap: 8px; padding: 10px 10px; }
       .dockBtn{ padding: 9px 12px; font-size: .9rem; }
-      .now{ bottom: 96px; padding: 10px 10px; }
+      .now{ padding: 10px 10px; }
       .now .ctrl{ gap: 6px; }
       .icon{ width: 38px; height: 36px; }
-      .mixer{ bottom: 148px; padding: 14px; }
+      .mixer{ padding: 14px; }
+    
+    }
+
+    @media (max-width: 560px) and (orientation: portrait){
+      :root{ --dockBase: 72px; --nowBase: 148px; --mixerBase: 206px; }
     }
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition: none !important; }
@@ -976,7 +989,30 @@
       toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
     }
 
-    // ===== Background video sanity check
+    
+    // ===== iOS/Safari safe-area & address-bar awareness (keeps dock visible in portrait)
+    (function(){
+      function updateViewportInset(){
+        try{
+          const vv = window.visualViewport;
+          if(!vv){ document.documentElement.style.setProperty("--vvb", "0px"); return; }
+          // layout viewport height (can include browser UI) minus visual viewport height
+          const layoutH = document.documentElement.clientHeight;
+          const vvb = Math.max(0, layoutH - vv.height - (vv.offsetTop || 0));
+          document.documentElement.style.setProperty("--vvb", vvb + "px");
+        }catch(e){
+          document.documentElement.style.setProperty("--vvb", "0px");
+        }
+      }
+      updateViewportInset();
+      window.addEventListener("resize", updateViewportInset);
+      if(window.visualViewport){
+        window.visualViewport.addEventListener("resize", updateViewportInset);
+        window.visualViewport.addEventListener("scroll", updateViewportInset);
+      }
+    })();
+
+// ===== Background video sanity check
     const bgVideo = document.getElementById("bgVideo");
     const markVideoReady = () => {
       document.body.classList.add("video-ready");
